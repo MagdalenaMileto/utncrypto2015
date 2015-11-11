@@ -25,8 +25,8 @@
 /*                                                                            */
 /******************************************************************************/
 
-#include "ecrypt-sync.h"
-#include "ecrypt-portable.h"
+#include "ecrypt/ecrypt-sync.h"
+#include "ecrypt/ecrypt-portable.h"
 
 /* -------------------------------------------------------------------------- */
 

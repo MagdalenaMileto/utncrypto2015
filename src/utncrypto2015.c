@@ -8,30 +8,10 @@
  ============================================================================
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "ecrypt-sync.h"
-#include <string.h>
-#include <math.h>
-
-const int CIFRAR = 0;
-const int DECIFRAR = 1;
-
-long int tamanio_archivo(char* path);
-void inicia_ctx(ECRYPT_ctx * ctx, char * path);
-void cifrador(int accion, FILE * archivo_origen, FILE * archivo_destino,
-		ECRYPT_ctx * ctx, int tamanio_bloque);
-int comprueba(char * path_original, char * path_final);
-char * conseguir_extension(char * path_origen);
-void MinToMay(char string[]);
-void cifrador_archivo(int accion, char * path_origen, char * path_destino, ECRYPT_ctx * ctx);
+#include "utncrypto2015.h"
 
 int main(int argc, char **argv) {
 
-/*	ECRYPT_ctx * ctx = malloc(sizeof(ECRYPT_ctx));
-	inicia_ctx(ctx, "C:\\Users\\admin\\git\\utncrypto2015\\mingw debug\\config.txt");
-	cifrador_archivo(CIFRAR, "C:\\Users\\admin\\git\\utncrypto2015\\mingw debug\\j.jpg", "C:\\Users\\admin\\git\\utncrypto2015\\mingw debug\\j2.jpg", ctx);
-*/
 	int accion = 0;
 	if (argc > 1)
 		accion = argv[1][0] - 48; // Paso del codigo ASCII a decimal
@@ -43,7 +23,7 @@ int main(int argc, char **argv) {
 		ECRYPT_ctx * ctx = malloc(sizeof(ECRYPT_ctx));
 
 		switch (accion) {
-		case 0:									//CIFRAR
+		case CIFRAR:									//CIFRAR
 			printf("Seleccionaste Cifrar \n");
 			printf("El archivo de ORIGEN es: %s \n", argv[2]);
 			printf("El archivo de DESTINO es: %s \n", argv[3]);
@@ -51,25 +31,25 @@ int main(int argc, char **argv) {
 			inicia_ctx(ctx, argv[4]);
 			cifrador_archivo(CIFRAR, argv[2], argv[3], ctx);
 			printf("\n");
-			printf( "     /)_/)                                       \n");
-			printf( "    ( ^.^)      Cifrado correcto!                \n");
-			printf( "    c(\")(\")                                    \n");
+			printf("     /)_/)                                       \n");
+			printf("    ( ^.^)      Cifrado correcto!                \n");
+			printf("    c(\")(\")                                    \n");
 
 			break;
-		case 1:									//DECIFRAR
+		case DESCIFRAR:									//DECIFRAR
 			printf("Seleccionaste Decifrar \n");
 			printf("El archivo de ORIGEN es: %s \n", argv[2]);
 			printf("El archivo de DESTINO es: %s \n", argv[3]);
 
 			inicia_ctx(ctx, argv[4]);
-			cifrador_archivo(DECIFRAR, argv[2], argv[3], ctx);
+			cifrador_archivo(DESCIFRAR, argv[2], argv[3], ctx);
 			printf("\n");
-			printf( "     /)_/)                                       \n");
-			printf( "    ( ^.^)      Decifrado correcto!              \n");
-			printf( "    c(\")(\")                                    \n");
+			printf("     /)_/)                                       \n");
+			printf("    ( ^.^)      Decifrado correcto!              \n");
+			printf("    c(\")(\")                                    \n");
 
 			break;
-		case 2:									//COMPROBAR IMAGENES
+		case COMPROBAR:									//COMPROBAR IMAGENES
 			printf("Seleccionaste Comprobar cifrado \n");
 			printf("El archivo ORIGINAL es: %s \n", argv[2]);
 			printf("El archivo DECIFRADO es: %s \n", argv[3]);
@@ -77,17 +57,16 @@ int main(int argc, char **argv) {
 			printf("El resultado del proceso es... \n\n");
 
 			if (comprueba(argv[2], argv[3]) == 0) {
-				printf( "     /)_/)                                       \n");
-				printf( "    ( ^.^)      Comprobacion correcta!           \n");
-				printf( "    c(\")(\")                                    \n");
+				printf("     /)_/)                                       \n");
+				printf("    ( ^.^)      Comprobacion correcta!           \n");
+				printf("    c(\")(\")                                    \n");
 			} else {
-				printf( "     /)_/)                                       \n");
-				printf( "    ( v.v)      Comprobacion incorrecta!         \n");
-				printf( "    c(\")(\")                                    \n");
+				printf("     /)_/)                                       \n");
+				printf("    ( v.v)      Comprobacion incorrecta!         \n");
+				printf("    c(\")(\")                                    \n");
 			}
 			break;
-		default:
-			break;
+
 		}
 	}
 
@@ -129,9 +108,11 @@ char * conseguir_extension(char * path_origen) {
 
 	char * extension;
 	int i = 0, fin;
-	while (path_origen[i] != '\0') i++;
+	while (path_origen[i] != '\0')
+		i++;
 	fin = i;
-	for (; path_origen[i] != '.'; i--) ;
+	for (; path_origen[i] != '.'; i--)
+		;
 	i++;
 	extension = malloc(fin - i);
 	memcpy(extension, path_origen + i, fin - i);
@@ -143,21 +124,19 @@ char * conseguir_extension(char * path_origen) {
 	return extension;
 }
 
-void MinToMay(char string[]){
-	int i=0;
-	int desp='a'-'A';
-	for (i=0;string[i]!='\0';++i)
-	{
-		if(string[i]>='a'&&string[i]<='z')
-		{
-			string[i]=string[i]-desp;
+void MinToMay(char string[]) {
+	int i = 0;
+	int desp = 'a' - 'A';
+	for (i = 0; string[i] != '\0'; ++i) {
+		if (string[i] >= 'a' && string[i] <= 'z') {
+			string[i] = string[i] - desp;
 		}
 	}
 }
 
 long int tamanio_archivo(char* path) {
 
-	// Devuelve el tamaño del archivo, incluyendo el encabezado
+	// Devuelve el tamaï¿½o del archivo, incluyendo el encabezado
 	FILE * fichero;
 	long int tamanio = 0;
 
@@ -208,14 +187,16 @@ void inicia_ctx(ECRYPT_ctx * ctx, char * path_ctx) {
 	ctx->work_ctx.carry = (u32) work_carry;
 }
 
-void copiar_texto_claro(FILE * archivo_origen, FILE * archivo_destino, int tamanio){
+void copiar_texto_claro(FILE * archivo_origen, FILE * archivo_destino,
+		int tamanio) {
 	u8 * texto = malloc(tamanio);
 	fread(texto, tamanio, 1, archivo_origen);
 	fwrite(texto, tamanio, 1, archivo_destino);
 	free(texto);
 }
 
-void cifrador_archivo(int accion, char * path_origen, char * path_destino, ECRYPT_ctx * ctx){
+void cifrador_archivo(int accion, char * path_origen, char * path_destino,
+		ECRYPT_ctx * ctx) {
 
 	FILE * archivo_origen;
 	FILE * archivo_destino;
@@ -240,22 +221,25 @@ void cifrador_archivo(int accion, char * path_origen, char * path_destino, ECRYP
 		long int encabezado = 53;
 		long int total_archivo = tamanio_archivo(path_origen);
 
-		copiar_texto_claro( archivo_origen, archivo_destino, encabezado);
-		cifrador(accion, archivo_origen, archivo_destino, ctx, total_archivo - encabezado);
+		copiar_texto_claro(archivo_origen, archivo_destino, encabezado);
+		cifrador(accion, archivo_origen, archivo_destino, ctx,
+				total_archivo - encabezado);
 
-	} else if(strcmp(extension, "AVI") == 0){
+	} else if (strcmp(extension, "AVI") == 0) {
 		long int encabezado = 100000;
 		long int total_archivo = tamanio_archivo(path_origen);
 
-		copiar_texto_claro( archivo_origen, archivo_destino, encabezado);
-		cifrador(accion, archivo_origen, archivo_destino, ctx, total_archivo - encabezado);
+		copiar_texto_claro(archivo_origen, archivo_destino, encabezado);
+		cifrador(accion, archivo_origen, archivo_destino, ctx,
+				total_archivo - encabezado);
 
-	} else if(strcmp(extension, "WAV") == 0){
+	} else if (strcmp(extension, "WAV") == 0) {
 		long int encabezado = 44;
 		long int total_archivo = tamanio_archivo(path_origen);
 
-		copiar_texto_claro( archivo_origen, archivo_destino, encabezado);
-		cifrador(accion, archivo_origen, archivo_destino, ctx, total_archivo - encabezado);
+		copiar_texto_claro(archivo_origen, archivo_destino, encabezado);
+		cifrador(accion, archivo_origen, archivo_destino, ctx,
+				total_archivo - encabezado);
 
 	}
 
@@ -282,7 +266,7 @@ void cifrador(int accion, FILE * archivo_origen, FILE * archivo_destino,
 	fread(lector, tamanio_bloque, 1, archivo_origen);
 
 	// Proceso lo que obtengo en la lectura
-	ECRYPT_process_bytes(accion, ctx, lector, output, tamanio_bloque);
+	ECRYPT_process_packet(accion,ctx,&iv,lector,output,tamanio_bloque);
 
 	// Paso a una unica direccion de memoria para hacer una sola escritura
 	fwrite(output, tamanio_bloque, 1, archivo_destino);
